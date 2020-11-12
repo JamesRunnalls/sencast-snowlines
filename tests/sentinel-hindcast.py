@@ -6,6 +6,8 @@
 import cartopy.crs
 import netCDF4
 
+import sys
+sys.path.append("/home/jamesrunnalls/eawagrs/sentinel-hindcast/build/sentinel-hindcast")
 from main import hindcast
 
-hindcast("parameters_geomCH_S2.ini")
+hindcast("/home/jamesrunnalls/eawagrs/sentinel-hindcast/build/sentinel-hindcast/parameters/chaojie_sui_S2.ini")

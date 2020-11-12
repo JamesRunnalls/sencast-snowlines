@@ -10,4 +10,4 @@ import sys
 sys.path.append("/home/jamesrunnalls/eawagrs/sentinel-hindcast/build/sentinel-hindcast")
 from main import hindcast
 
-hindcast("/home/jamesrunnalls/eawagrs/sentinel-hindcast/build/sentinel-hindcast/parameters/snowline_test.ini")
+hindcast("/home/jamesrunnalls/eawagrs/sentinel-hindcast/build/sentinel-hindcast/parameters/snowline_run.ini")
