@@ -284,6 +284,8 @@ def hindcast_product_group(env, params, do_download, auth, download_requests, l1
                 from adapters.secchidepth.secchidepth import apply
             elif adapter == "MDN":
                 from adapters.mdn.mdn import apply
+            elif adapter == "SNOWLINES":
+                from adapters.snowlines.snowlines import apply
             else:
                 raise RuntimeError("Unknown adapter: {}".format(adapter))
 

@@ -1,0 +1,96 @@
+<graph id="Graph">
+    <version>1.0</version>
+	 <node id="Read">
+        <operator>Read</operator>
+        <sources/>
+        <parameters class="com.bc.ceres.binding.dom.XppDomElement">
+          <file>${infile}</file>
+        </parameters>
+      </node>
+    <node id="BandmathsNode">
+		<operator>BandMaths</operator>
+		<sources>
+			<source>Read</source>
+		</sources>
+		<parameters>
+			<targetBands>
+                <targetBand>
+					<name>IDEPIX_SNOW_ICE</name>
+					<type>float32</type>
+					<expression>IDEPIX_SNOW_ICE</expression>
+					<noDataValue>NaN</noDataValue>
+				</targetBand>
+				<targetBand>
+					<name>IDEPIX_CLOUD</name>
+					<type>float32</type>
+					<expression>IDEPIX_CLOUD</expression>
+					<noDataValue>NaN</noDataValue>
+				</targetBand>
+				<targetBand>
+					<name>IDEPIX_INVALID</name>
+					<type>float32</type>
+					<expression>IDEPIX_INVALID</expression>
+					<noDataValue>NaN</noDataValue>
+				</targetBand>
+				<targetBand>
+					<name>IDEPIX_CLOUD_AMBIGUOUS</name>
+					<type>float32</type>
+					<expression>IDEPIX_CLOUD_AMBIGUOUS</expression>
+					<noDataValue>NaN</noDataValue>
+				</targetBand>
+				<targetBand>
+					<name>IDEPIX_CLOUD_SURE</name>
+					<type>float32</type>
+					<expression>IDEPIX_CLOUD_SURE</expression>
+					<noDataValue>NaN</noDataValue>
+				</targetBand>
+				<targetBand>
+					<name>IDEPIX_CLOUD_BUFFER</name>
+					<type>float32</type>
+					<expression>IDEPIX_CLOUD_BUFFER</expression>
+					<noDataValue>NaN</noDataValue>
+				</targetBand>
+				<targetBand>
+					<name>IDEPIX_CLOUD_SHADOW</name>
+					<type>float32</type>
+					<expression>IDEPIX_CLOUD_SHADOW</expression>
+					<noDataValue>NaN</noDataValue>
+				</targetBand>
+				<targetBand>
+					<name>IDEPIX_LAND</name>
+					<type>float32</type>
+					<expression>IDEPIX_LAND</expression>
+					<noDataValue>NaN</noDataValue>
+				</targetBand>
+                <targetBand>
+					<name>RED</name>
+					<type>float32</type>
+					<expression>log(1.0 + 0.01 * Oa01_radiance + 0.09 * Oa02_radiance + 0.35 * Oa03_radiance + 0.04 * Oa04_radiance + 0.01 * Oa05_radiance + 0.59 * Oa06_radiance + 0.85 * Oa07_radiance + 0.12 * Oa08_radiance + 0.07 * Oa09_radiance + 0.04 * Oa10_radiance)</expression>
+					<noDataValue>NaN</noDataValue>
+				</targetBand>
+                <targetBand>
+					<name>GREEN</name>
+					<type>float32</type>
+					<expression>log(1.0 + 0.26 * Oa03_radiance + 0.21 * Oa04_radiance + 0.50 * Oa05_radiance + Oa06_radiance + 0.38 * Oa07_radiance + 0.04 * Oa08_radiance + 0.03 * Oa09_radiance + 0.02 * Oa10_radiance)</expression>
+					<noDataValue>NaN</noDataValue>
+				</targetBand>
+                <targetBand>
+					<name>BLUE</name>
+					<type>float32</type>
+					<expression>log(1.0 + 0.07 * Oa01_radiance + 0.28 * Oa02_radiance + 1.77 * Oa03_radiance + 0.47 * Oa04_radiance + 0.16 * Oa05_radiance)</expression>
+					<noDataValue>NaN</noDataValue>
+				</targetBand>
+			</targetBands>
+    	</parameters>
+	</node>
+    <node id="WriteNode">
+        <operator>Write</operator>
+		<sources>
+			<source>BandmathsNode</source>
+		</sources>
+		<parameters>
+			<file>${outfile}</file>
+			<formatName>NetCDF4-BEAM</formatName>
+		</parameters>
+    </node>
+</graph>

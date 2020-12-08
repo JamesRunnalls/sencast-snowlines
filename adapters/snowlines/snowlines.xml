@@ -1,0 +1,221 @@
+<graph id="Graph">
+  <version>1.0</version>
+  <node id="Read">
+    <operator>Read</operator>
+    <sources/>
+    <parameters class="com.bc.ceres.binding.dom.XppDomElement">
+      <file>${infile}</file>
+    </parameters>
+  </node>
+  <node id="BandMaths">
+    <operator>BandMaths</operator>
+    <sources>
+      <sourceProduct refid="Read"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.XppDomElement">
+      <targetBands>
+        <targetBand>
+          <name>IDEPIX_SNOW_ICE</name>
+          <type>float32</type>
+          <expression>IDEPIX_SNOW_ICE</expression>
+          <description/>
+          <unit/>
+          <noDataValue>0.0</noDataValue>
+        </targetBand>
+      </targetBands>
+      <variables/>
+    </parameters>
+  </node>
+  <node id="BandMaths2">
+    <operator>BandMaths</operator>
+    <sources>
+      <sourceProduct refid="Read"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.XppDomElement">
+      <targetBands>
+        <targetBand>
+          <name>IDEPIX_CLOUD</name>
+          <type>float32</type>
+          <expression>IDEPIX_CLOUD</expression>
+          <description/>
+          <unit/>
+          <noDataValue>0.0</noDataValue>
+        </targetBand>
+      </targetBands>
+      <variables/>
+    </parameters>
+  </node>
+  <node id="BandMaths3">
+    <operator>BandMaths</operator>
+    <sources>
+      <sourceProduct refid="Read"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.XppDomElement">
+      <targetBands>
+        <targetBand>
+          <name>IDEPIX_INVALID</name>
+          <type>float32</type>
+          <expression>IDEPIX_INVALID</expression>
+          <description/>
+          <unit/>
+          <noDataValue>0.0</noDataValue>
+        </targetBand>
+      </targetBands>
+      <variables/>
+    </parameters>
+  </node>
+  <node id="BandMaths4">
+    <operator>BandMaths</operator>
+    <sources>
+      <sourceProduct refid="Read"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.XppDomElement">
+      <targetBands>
+        <targetBand>
+          <name>IDEPIX_CLOUD_AMBIGUOUS</name>
+          <type>float32</type>
+          <expression>IDEPIX_CLOUD_AMBIGUOUS</expression>
+          <description/>
+          <unit/>
+          <noDataValue>0.0</noDataValue>
+        </targetBand>
+      </targetBands>
+      <variables/>
+    </parameters>
+  </node>
+  <node id="BandMaths5">
+    <operator>BandMaths</operator>
+    <sources>
+      <sourceProduct refid="Read"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.XppDomElement">
+      <targetBands>
+        <targetBand>
+          <name>IDEPIX_CLOUD_SURE</name>
+          <type>float32</type>
+          <expression>IDEPIX_CLOUD_SURE</expression>
+          <description/>
+          <unit/>
+          <noDataValue>0.0</noDataValue>
+        </targetBand>
+      </targetBands>
+      <variables/>
+    </parameters>
+  </node>
+  <node id="BandMaths6">
+    <operator>BandMaths</operator>
+    <sources>
+      <sourceProduct refid="Read"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.XppDomElement">
+      <targetBands>
+        <targetBand>
+          <name>IDEPIX_CLOUD_BUFFER</name>
+          <type>float32</type>
+          <expression>IDEPIX_CLOUD_BUFFER</expression>
+          <description/>
+          <unit/>
+          <noDataValue>0.0</noDataValue>
+        </targetBand>
+      </targetBands>
+      <variables/>
+    </parameters>
+  </node>
+  <node id="BandMaths7">
+    <operator>BandMaths</operator>
+    <sources>
+      <sourceProduct refid="Read"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.XppDomElement">
+      <targetBands>
+        <targetBand>
+          <name>IDEPIX_CLOUD_SHADOW</name>
+          <type>float32</type>
+          <expression>IDEPIX_CLOUD_SHADOW</expression>
+          <description/>
+          <unit/>
+          <noDataValue>0.0</noDataValue>
+        </targetBand>
+      </targetBands>
+      <variables/>
+    </parameters>
+  </node>
+  <node id="BandMaths8">
+    <operator>BandMaths</operator>
+    <sources>
+      <sourceProduct refid="Read"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.XppDomElement">
+      <targetBands>
+        <targetBand>
+          <name>IDEPIX_LAND</name>
+          <type>float32</type>
+          <expression>IDEPIX_LAND</expression>
+          <description/>
+          <unit/>
+          <noDataValue>0.0</noDataValue>
+        </targetBand>
+      </targetBands>
+      <variables/>
+    </parameters>
+  </node>
+  <node id="mergeNode">
+		<operator>merge</operator>
+		<sources>
+			<masterProduct>BandMaths</masterProduct>
+			<slaveProduct>BandMaths2</slaveProduct>
+		</sources>
+	</node>
+   <node id="mergeNode2">
+		<operator>merge</operator>
+		<sources>
+			<masterProduct>mergeNode</masterProduct>
+			<slaveProduct>BandMaths3</slaveProduct>
+		</sources>
+	</node>
+  <node id="mergeNode3">
+		<operator>merge</operator>
+		<sources>
+			<masterProduct>mergeNode2</masterProduct>
+			<slaveProduct>BandMaths4</slaveProduct>
+		</sources>
+	</node>
+  <node id="mergeNode4">
+		<operator>merge</operator>
+		<sources>
+			<masterProduct>mergeNode3</masterProduct>
+			<slaveProduct>BandMaths5</slaveProduct>
+		</sources>
+	</node>
+  <node id="mergeNode5">
+		<operator>merge</operator>
+		<sources>
+			<masterProduct>mergeNode4</masterProduct>
+			<slaveProduct>BandMaths6</slaveProduct>
+		</sources>
+	</node>
+  <node id="mergeNode6">
+		<operator>merge</operator>
+		<sources>
+			<masterProduct>mergeNode5</masterProduct>
+			<slaveProduct>BandMaths7</slaveProduct>
+		</sources>
+	</node>
+  <node id="mergeNode7">
+		<operator>merge</operator>
+		<sources>
+			<masterProduct>mergeNode6</masterProduct>
+			<slaveProduct>BandMaths8</slaveProduct>
+		</sources>
+	</node>
+  <node id="Write">
+    <operator>Write</operator>
+    <sources>
+      <sourceProduct refid="mergeNode7"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.XppDomElement">
+      <file>${outfile}</file>
+      <formatName>NetCDF4-BEAM</formatName>
+    </parameters>
+  </node>
+</graph>
