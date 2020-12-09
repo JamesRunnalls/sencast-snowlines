@@ -5,6 +5,8 @@
 
 import os
 import subprocess
+import boto3
+from botocore.exceptions import NoCredentialsError
 from snappy import ProductIO, ProductUtils, Product
 
 # key of the params section for this adapter
@@ -75,6 +77,9 @@ def apply(env, params, l2product_files, date):
             print("No file was created.")
         raise RuntimeError("GPT Failed.")
 
+    upload_to_aws(output_file, "snowlines-satellite", os.path.basename(output_file), params[PARAMS_SECTION]["access"],
+                  params[PARAMS_SECTION]["secret"])
+
 
 def rewrite_xml(gpt_xml_file, input_file, output_file):
     with open(os.path.join(os.path.dirname(__file__), GPT_XML_FILENAME), "r") as f:
@@ -85,3 +90,17 @@ def rewrite_xml(gpt_xml_file, input_file, output_file):
     os.makedirs(os.path.dirname(gpt_xml_file), exist_ok=True)
     with open(gpt_xml_file, "w") as f:
         f.write(xml)
+
+def upload_to_aws(local_file, bucket, s3_file, access_key, secret_key):
+    print("Uploading output to S3 Bucket...")
+    s3 = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
+    try:
+        s3.upload_file(local_file, bucket, s3_file)
+        print("Upload Successful")
+        return True
+    except FileNotFoundError:
+        print("The file was not found")
+        raise RuntimeError("Failed to find input file to upload to S3 bucket")
+    except NoCredentialsError:
+        print("Credentials not available")
+        raise RuntimeError("Credentials not available to upload to S3 bucket")
