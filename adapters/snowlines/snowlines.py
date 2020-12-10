@@ -3,10 +3,10 @@
 
 """ This adapter gets the snow-ice from a Polymer file """
 
-import os
+import os, sys
 import subprocess
 import boto3
-from botocore.exceptions import NoCredentialsError
+from botocore.exceptions import NoCredentialsError, ClientError
 from snappy import ProductIO, ProductUtils, Product
 
 # key of the params section for this adapter
@@ -46,6 +46,9 @@ def apply(env, params, l2product_files, date):
     if processor != "IDEPIX":
         raise RuntimeWarning("Snowlines adapter only works with IDEPIX processor output")
 
+    if "script" in params[PARAMS_SECTION]:
+        sys.path.append(params[PARAMS_SECTION]["script"])
+
     # Check for precursor datasets
     if processor not in l2product_files or not os.path.exists(l2product_files[processor]):
         raise RuntimeWarning("IDEPIX precursor file not found ensure IDEPIX is run before this adapter.")
@@ -62,6 +65,9 @@ def apply(env, params, l2product_files, date):
             os.remove(output_file)
         else:
             print("Skipping Snowline, target already exists: {}".format(FILENAME.format(product_name)))
+            upload_to_s3(output_file, "snowlines-satellite", os.path.basename(output_file),
+                         params[PARAMS_SECTION]["access"],
+                         params[PARAMS_SECTION]["secret"])
             return output_file
     os.makedirs(product_dir, exist_ok=True)
 
@@ -77,7 +83,7 @@ def apply(env, params, l2product_files, date):
             print("No file was created.")
         raise RuntimeError("GPT Failed.")
 
-    upload_to_aws(output_file, "snowlines-satellite", os.path.basename(output_file), params[PARAMS_SECTION]["access"],
+    upload_to_s3(output_file, "snowlines-satellite", os.path.basename(output_file), params[PARAMS_SECTION]["access"],
                   params[PARAMS_SECTION]["secret"])
 
 
@@ -91,16 +97,32 @@ def rewrite_xml(gpt_xml_file, input_file, output_file):
     with open(gpt_xml_file, "w") as f:
         f.write(xml)
 
-def upload_to_aws(local_file, bucket, s3_file, access_key, secret_key):
+
+def upload_to_s3(local_file, bucket, s3_file, access_key, secret_key):
     print("Uploading output to S3 Bucket...")
     s3 = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
+    if exists_in_s3(s3, bucket, s3_file):
+        try:
+            #s3.upload_file(local_file, bucket, s3_file)
+            print("Upload Successful")
+            return True
+        except FileNotFoundError:
+            print("The file was not found")
+            raise RuntimeError("Failed to find input file to upload to S3 bucket")
+        except NoCredentialsError:
+            print("Credentials not available")
+            raise RuntimeError("Credentials not available to upload to S3 bucket")
+
+
+def exists_in_s3(s3, bucket, s3_file):
     try:
-        s3.upload_file(local_file, bucket, s3_file)
-        print("Upload Successful")
+        s3.head_object(Bucket=bucket, Key=s3_file)
+        print("File already exists in S3")
+        return False
+    except ClientError as e:
         return True
-    except FileNotFoundError:
-        print("The file was not found")
-        raise RuntimeError("Failed to find input file to upload to S3 bucket")
-    except NoCredentialsError:
-        print("Credentials not available")
-        raise RuntimeError("Credentials not available to upload to S3 bucket")
+    return True
+
+
+def create_snowline():
+    print("Produce snowline")
