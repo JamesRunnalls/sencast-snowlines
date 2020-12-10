@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-package_location = "/home/ubuntu"
+package_location = "/home/ubuntu/sencast-snowlines"
 output_location = "/home/ubuntu/DIAS/output_data"
 clear_downloads = "/home/ubuntu/DIAS/input_data/OLCI_L1"
 parameter_file = "snowline_run.ini"

@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-package_location = "/home/ubuntu"
+package_location = "/home/ubuntu/sencast-snowlines"
 parameter_file = "snowline_run.ini"
 
 import sys
