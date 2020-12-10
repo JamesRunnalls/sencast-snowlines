@@ -68,12 +68,12 @@ def apply(env, params, l2product_files, date):
             upload_to_s3(output_file, "snowlines-satellite", os.path.basename(output_file),
                          params[PARAMS_SECTION]["access"],
                          params[PARAMS_SECTION]["secret"])
+            create_snowline()
             return output_file
     os.makedirs(product_dir, exist_ok=True)
 
     gpt_xml_file = os.path.join(product_dir, "_reproducibility", GPT_XML_FILENAME)
-    if not os.path.isfile(gpt_xml_file):
-        rewrite_xml(gpt_xml_file, product_path, output_file)
+    rewrite_xml(gpt_xml_file, product_path, output_file)
 
     args = [gpt, gpt_xml_file, "-c", env['General']['gpt_cache_size']]
     if subprocess.call(args):
@@ -85,6 +85,8 @@ def apply(env, params, l2product_files, date):
 
     upload_to_s3(output_file, "snowlines-satellite", os.path.basename(output_file), params[PARAMS_SECTION]["access"],
                   params[PARAMS_SECTION]["secret"])
+
+    create_snowline()
 
 
 def rewrite_xml(gpt_xml_file, input_file, output_file):
@@ -103,7 +105,7 @@ def upload_to_s3(local_file, bucket, s3_file, access_key, secret_key):
     s3 = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
     if exists_in_s3(s3, bucket, s3_file):
         try:
-            #s3.upload_file(local_file, bucket, s3_file)
+            s3.upload_file(local_file, bucket, s3_file)
             print("Upload Successful")
             return True
         except FileNotFoundError:
