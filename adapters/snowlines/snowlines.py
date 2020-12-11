@@ -3,11 +3,11 @@
 
 """ This adapter gets the snow-ice from a Polymer file """
 
-import os, sys
+import os
+import sys
 import subprocess
 import boto3
 from botocore.exceptions import NoCredentialsError, ClientError
-from snappy import ProductIO, ProductUtils, Product
 
 # key of the params section for this adapter
 PARAMS_SECTION = "SNOWLINES"
@@ -42,12 +42,15 @@ def apply(env, params, l2product_files, date):
     if "processor" not in params[PARAMS_SECTION]:
         raise RuntimeWarning("processor must be defined in the parameter file.")
 
+    if "script" in params[PARAMS_SECTION] and "state" in params[PARAMS_SECTION]:
+        create_boundary = True
+    else:
+        print("Provide 'script' and 'state' in parameter file in order to produce snowline boundary")
+        create_boundary = False
+
     processor = params[PARAMS_SECTION]["processor"]
     if processor != "IDEPIX":
         raise RuntimeWarning("Snowlines adapter only works with IDEPIX processor output")
-
-    if "script" in params[PARAMS_SECTION]:
-        sys.path.append(params[PARAMS_SECTION]["script"])
 
     # Check for precursor datasets
     if processor not in l2product_files or not os.path.exists(l2product_files[processor]):
@@ -68,7 +71,7 @@ def apply(env, params, l2product_files, date):
             upload_to_s3(output_file, "snowlines-satellite", os.path.basename(output_file),
                          params[PARAMS_SECTION]["access"],
                          params[PARAMS_SECTION]["secret"])
-            create_snowline()
+            create_snowline(params[PARAMS_SECTION]["state"], output_file, create_boundary, params[PARAMS_SECTION]["script"], params[PARAMS_SECTION]["access"], params[PARAMS_SECTION]["secret"])
             return output_file
     os.makedirs(product_dir, exist_ok=True)
 
@@ -86,7 +89,7 @@ def apply(env, params, l2product_files, date):
     upload_to_s3(output_file, "snowlines-satellite", os.path.basename(output_file), params[PARAMS_SECTION]["access"],
                   params[PARAMS_SECTION]["secret"])
 
-    create_snowline()
+    create_snowline(params[PARAMS_SECTION]["state"], output_file, create_boundary, params[PARAMS_SECTION]["script"], params[PARAMS_SECTION]["access"], params[PARAMS_SECTION]["secret"])
 
 
 def rewrite_xml(gpt_xml_file, input_file, output_file):
@@ -105,7 +108,7 @@ def upload_to_s3(local_file, bucket, s3_file, access_key, secret_key):
     s3 = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
     if exists_in_s3(s3, bucket, s3_file):
         try:
-            s3.upload_file(local_file, bucket, s3_file)
+            #s3.upload_file(local_file, bucket, s3_file)
             print("Upload Successful")
             return True
         except FileNotFoundError:
@@ -126,5 +129,12 @@ def exists_in_s3(s3, bucket, s3_file):
     return True
 
 
-def create_snowline():
-    print("Produce snowline")
+def create_snowline(state, input, run, script, access_key, secret_key):
+    if run:
+        print("Produce snowline")
+        sys.path.append(script)
+        from snowline.bin.update_snowmap import update_snowmap
+        update_snowmap(state, input,
+            new_update_map_path=None, allow_start_zeros=True,
+            dry_run=False, aws_access_key_id=access_key,
+            aws_secret_access_key=secret_key)
