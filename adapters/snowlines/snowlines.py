@@ -108,7 +108,7 @@ def upload_to_s3(local_file, bucket, s3_file, access_key, secret_key):
     s3 = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
     if exists_in_s3(s3, bucket, s3_file):
         try:
-            #s3.upload_file(local_file, bucket, s3_file)
+            s3.upload_file(local_file, bucket, s3_file)
             print("Upload Successful")
             return True
         except FileNotFoundError:
@@ -135,6 +135,6 @@ def create_snowline(state, input, run, script, access_key, secret_key):
         sys.path.append(script)
         from snowline.bin.update_snowmap import update_snowmap
         update_snowmap(state, input,
-            new_update_map_path=None, allow_start_zeros=True,
+            new_update_map_path=state, allow_start_zeros=True,
             dry_run=False, aws_access_key_id=access_key,
             aws_secret_access_key=secret_key)
