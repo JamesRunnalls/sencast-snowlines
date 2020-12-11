@@ -42,12 +42,6 @@ def apply(env, params, l2product_files, date):
     if "processor" not in params[PARAMS_SECTION]:
         raise RuntimeWarning("processor must be defined in the parameter file.")
 
-    if "script" in params[PARAMS_SECTION] and "state" in params[PARAMS_SECTION]:
-        create_boundary = True
-    else:
-        print("Provide 'script' and 'state' in parameter file in order to produce snowline boundary")
-        create_boundary = False
-
     processor = params[PARAMS_SECTION]["processor"]
     if processor != "IDEPIX":
         raise RuntimeWarning("Snowlines adapter only works with IDEPIX processor output")
@@ -71,7 +65,6 @@ def apply(env, params, l2product_files, date):
             upload_to_s3(output_file, "snowlines-satellite", os.path.basename(output_file),
                          params[PARAMS_SECTION]["access"],
                          params[PARAMS_SECTION]["secret"])
-            create_snowline(params[PARAMS_SECTION]["state"], output_file, create_boundary, params[PARAMS_SECTION]["script"], params[PARAMS_SECTION]["access"], params[PARAMS_SECTION]["secret"])
             return output_file
     os.makedirs(product_dir, exist_ok=True)
 
@@ -88,8 +81,6 @@ def apply(env, params, l2product_files, date):
 
     upload_to_s3(output_file, "snowlines-satellite", os.path.basename(output_file), params[PARAMS_SECTION]["access"],
                   params[PARAMS_SECTION]["secret"])
-
-    create_snowline(params[PARAMS_SECTION]["state"], output_file, create_boundary, params[PARAMS_SECTION]["script"], params[PARAMS_SECTION]["access"], params[PARAMS_SECTION]["secret"])
 
 
 def rewrite_xml(gpt_xml_file, input_file, output_file):
@@ -127,14 +118,3 @@ def exists_in_s3(s3, bucket, s3_file):
     except ClientError as e:
         return True
     return True
-
-
-def create_snowline(state, input, run, script, access_key, secret_key):
-    if run:
-        print("Produce snowline")
-        sys.path.append(script)
-        from snowline.bin.update_snowmap import update_snowmap
-        update_snowmap(state, input,
-            new_update_map_path=state, allow_start_zeros=True,
-            dry_run=False, aws_access_key_id=access_key,
-            aws_secret_access_key=secret_key)
