@@ -125,14 +125,17 @@ def do_hindcast(env, params, l2_path, max_parallel_downloads=1, max_parallel_pro
 
     # group download requests and product paths by date and sort them by group size and sensing date
     download_groups, l1product_path_groups = {}, {}
+    i = 0
     for download_request, l1product_path in zip(download_requests, l1product_paths):
         date = get_sensing_date_from_product_name(os.path.basename(l1product_path))
         satellite = get_satellite_name_from_product_name(os.path.basename(l1product_path))
-        group = date + "_" + satellite
+        group = date + "_" + satellite + "_" + str(i)
         if group not in download_groups.keys():
             download_groups[group], l1product_path_groups[group] = [], []
+            i = i + 1
         download_groups[group].append(download_request)
         l1product_path_groups[group].append(l1product_path)
+
 
     # print information about grouped products
     print("The products have been grouped into {} group(s).".format(len(l1product_path_groups)))
@@ -247,7 +250,7 @@ def hindcast_product_group(env, params, do_download, auth, download_requests, l1
                     traceback.print_exc()
 
         # mosaic outputs
-        for processor in list(filter(None, params['General']['processors'].split(","))):
+        """for processor in list(filter(None, params['General']['processors'].split(","))):
             tmp = []
             for l1product_path in l1product_paths:
                 if processor in l2product_files[l1product_path].keys():
@@ -266,7 +269,7 @@ def hindcast_product_group(env, params, do_download, auth, download_requests, l1
 
         for l1product_path in l1product_paths:
             del(l2product_files[l1product_path])
-
+        """
     # apply adapters
     with semaphores['adapt']:
         for adapter in list(filter(None, params['General']['adapters'].split(","))):

@@ -7,8 +7,8 @@ import cartopy.crs
 import netCDF4
 
 import sys
-sys.path.append("/home/ubuntu/sencast-snowlines")
+sys.path.append("/media/jamesrunnalls/JamesSSD/Snowline/sencast-snowlines")
 
 from main import hindcast
 
-hindcast("/home/ubuntu/sencast-snowlines/parameters/snowline_run_s3.ini")
+hindcast("/media/jamesrunnalls/JamesSSD/Snowline/sencast-snowlines/parameters/snowline_run_s2.ini")

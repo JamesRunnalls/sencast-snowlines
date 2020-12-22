@@ -78,10 +78,12 @@ def filter_for_timeliness(download_requests, product_names):
 
 
 def minimal_subset_of_products(product_paths, wkt):
+
     # ensure that all products are overlapping
     if len(product_paths) not in [2, 4]:
         print("Warning: Only sets of 2 or 4 products can be compared!")
         return product_paths
+
     # ToDo: ensure that all products are overlapping
 
     # check which corners are covered by which products

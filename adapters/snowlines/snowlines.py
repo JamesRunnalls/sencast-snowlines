@@ -16,10 +16,11 @@ PARAMS_SECTION = "SNOWLINES"
 FILENAME = "L2SNOW_{}"
 FILEFOLDER = "L2SNOW"
 # The name of the xml file for gpt
-GPT_XML_FILENAME = "snowlines_OLCI.xml"
+GPT_XML_FILENAME = "snowlines_{}.xml"
 
 
 def apply(env, params, l2product_files, date):
+    print(l2product_files)
     """Apply Snowlines adapter.
         1. Calculates Snowlines from IdePix output
 
@@ -39,45 +40,49 @@ def apply(env, params, l2product_files, date):
 
     gpt = env['General']['gpt_path']
 
-    # Check for IDEPIX precursor dataset
-    if "IDEPIX" not in l2product_files or not os.path.exists(l2product_files["IDEPIX"]):
-        raise RuntimeWarning("IDEPIX precursor file not found ensure IDEPIX is run before this adapter.")
+    for key, product in l2product_files.items():
 
-    # Create folder for file
-    product_path = l2product_files["IDEPIX"]
-    product_name = os.path.basename(product_path)
-    product_dir = os.path.join(os.path.dirname(os.path.dirname(product_path)), FILEFOLDER)
-    output_file = os.path.join(product_dir, FILENAME.format(product_name))
+        # Check for IDEPIX precursor dataset
+        if "IDEPIX" not in product or not os.path.exists(product["IDEPIX"]):
+            raise RuntimeWarning("IDEPIX precursor file not found ensure IDEPIX is run before this adapter.")
 
-    if os.path.isfile(output_file):
-        if "synchronise" in params["General"].keys() and params['General']['synchronise'] == "false":
-            print("Removing file: ${}".format(output_file))
-            os.remove(output_file)
-        else:
-            print("Skipping Snowline, target already exists: {}".format(FILENAME.format(product_name)))
-            upload_to_s3(output_file, "snowlines-satellite", os.path.basename(output_file),
-                         env['SNOWLINES']['aws_access'],
-                         env['SNOWLINES']['aws_secret'])
-            return output_file
-    os.makedirs(product_dir, exist_ok=True)
+        sensor = params['General']['sensor']
 
-    gpt_xml_file = os.path.join(product_dir, "_reproducibility", GPT_XML_FILENAME)
-    rewrite_xml(gpt_xml_file, product_path, output_file)
+        # Create folder for file
+        product_path = product["IDEPIX"]
+        product_name = os.path.basename(product_path)
+        product_dir = os.path.join(os.path.dirname(os.path.dirname(product_path)), FILEFOLDER)
+        output_file = os.path.join(product_dir, FILENAME.format(product_name))
 
-    args = [gpt, gpt_xml_file, "-c", env['General']['gpt_cache_size']]
-    if subprocess.call(args):
-        if os.path.exists(output_file):
-            os.remove(output_file)
-        else:
-            print("No file was created.")
-        raise RuntimeError("GPT Failed.")
+        if os.path.isfile(output_file):
+            if "synchronise" in params["General"].keys() and params['General']['synchronise'] == "false":
+                print("Removing file: ${}".format(output_file))
+                os.remove(output_file)
+            else:
+                print("Skipping Snowline, target already exists: {}".format(FILENAME.format(product_name)))
+                upload_to_s3(output_file, "snowlines-satellite", os.path.basename(output_file),
+                             env['SNOWLINES']['aws_access'],
+                             env['SNOWLINES']['aws_secret'])
+                return output_file
+        os.makedirs(product_dir, exist_ok=True)
 
-    upload_to_s3(output_file, "snowlines-satellite", os.path.basename(output_file), env['SNOWLINES']["aws_access"],
-                  env['SNOWLINES']["aws_secret"])
+        gpt_xml_file = os.path.join(product_dir, "_reproducibility", GPT_XML_FILENAME.format(sensor))
+        rewrite_xml(gpt_xml_file, product_path, output_file, sensor)
+
+        args = [gpt, gpt_xml_file, "-c", env['General']['gpt_cache_size']]
+        if subprocess.call(args):
+            if os.path.exists(output_file):
+                os.remove(output_file)
+            else:
+                print("No file was created.")
+            raise RuntimeError("GPT Failed.")
+
+        upload_to_s3(output_file, "snowlines-satellite", os.path.basename(output_file), env['SNOWLINES']["aws_access"],
+                      env['SNOWLINES']["aws_secret"])
 
 
-def rewrite_xml(gpt_xml_file, input_file, output_file):
-    with open(os.path.join(os.path.dirname(__file__), GPT_XML_FILENAME), "r") as f:
+def rewrite_xml(gpt_xml_file, input_file, output_file, sensor):
+    with open(os.path.join(os.path.dirname(__file__), GPT_XML_FILENAME.format(sensor)), "r") as f:
         xml = f.read()
 
     xml = xml.replace("${infile}", input_file)
