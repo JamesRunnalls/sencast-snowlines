@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 package_location = "/home/ubuntu/sencast-snowlines"
-parameter_file = "snowline_run.ini"
+parameter_file = "snowline_run_s3.ini"
 clear_downloads = "/home/ubuntu/DIAS/input_data/OLCI_L1"
 
 import sys

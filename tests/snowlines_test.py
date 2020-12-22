@@ -11,4 +11,4 @@ sys.path.append("/home/ubuntu/sencast-snowlines")
 
 from main import hindcast
 
-hindcast("/home/ubuntu/sencast-snowlines/parameters/snowline_run.ini")
+hindcast("/home/ubuntu/sencast-snowlines/parameters/snowline_run_s3.ini")

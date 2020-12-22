@@ -39,19 +39,12 @@ def apply(env, params, l2product_files, date):
 
     gpt = env['General']['gpt_path']
 
-    if "processor" not in params[PARAMS_SECTION]:
-        raise RuntimeWarning("processor must be defined in the parameter file.")
-
-    processor = params[PARAMS_SECTION]["processor"]
-    if processor != "IDEPIX":
-        raise RuntimeWarning("Snowlines adapter only works with IDEPIX processor output")
-
-    # Check for precursor datasets
-    if processor not in l2product_files or not os.path.exists(l2product_files[processor]):
+    # Check for IDEPIX precursor dataset
+    if "IDEPIX" not in l2product_files or not os.path.exists(l2product_files["IDEPIX"]):
         raise RuntimeWarning("IDEPIX precursor file not found ensure IDEPIX is run before this adapter.")
 
     # Create folder for file
-    product_path = l2product_files[processor]
+    product_path = l2product_files["IDEPIX"]
     product_name = os.path.basename(product_path)
     product_dir = os.path.join(os.path.dirname(os.path.dirname(product_path)), FILEFOLDER)
     output_file = os.path.join(product_dir, FILENAME.format(product_name))
@@ -63,8 +56,8 @@ def apply(env, params, l2product_files, date):
         else:
             print("Skipping Snowline, target already exists: {}".format(FILENAME.format(product_name)))
             upload_to_s3(output_file, "snowlines-satellite", os.path.basename(output_file),
-                         params[PARAMS_SECTION]["access"],
-                         params[PARAMS_SECTION]["secret"])
+                         env['SNOWLINES']['aws_access'],
+                         env['SNOWLINES']['aws_secret'])
             return output_file
     os.makedirs(product_dir, exist_ok=True)
 
@@ -79,8 +72,8 @@ def apply(env, params, l2product_files, date):
             print("No file was created.")
         raise RuntimeError("GPT Failed.")
 
-    upload_to_s3(output_file, "snowlines-satellite", os.path.basename(output_file), params[PARAMS_SECTION]["access"],
-                  params[PARAMS_SECTION]["secret"])
+    upload_to_s3(output_file, "snowlines-satellite", os.path.basename(output_file), env['SNOWLINES']["aws_access"],
+                  env['SNOWLINES']["aws_secret"])
 
 
 def rewrite_xml(gpt_xml_file, input_file, output_file):
