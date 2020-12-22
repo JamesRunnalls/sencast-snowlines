@@ -1,3 +1,3 @@
 #!/bin/bash
-conda activate snowlines
+source activate snowlines
 python /home/ubuntu/sencast-snowlines/tests/snowlines_daily.py

@@ -17,8 +17,8 @@ from main import hindcast
 
 params, params_file = load_params(os.path.join(package_location, "parameters", parameter_file))
 
-start_date = datetime.datetime(2018, 4, 26)
-number_of_days = 10
+start_date = datetime.datetime(2020, 12, 18)
+number_of_days = 4
 
 for days in range(number_of_days):
     # Remove .ini file
